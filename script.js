@@ -74,14 +74,17 @@ async function loadPage(num) {
       const card = document.createElement('a');
       card.className = 'episode-card';
       card.href = ep.download;
-      const safe = ep.title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
-      card.download = `${safe}.mp4`;
+      card.target = '_blank';
+      card.rel = 'noopener noreferrer';
+
       const img = document.createElement('img');
       img.src = ep.thumbnail || 'https://placehold.co/320x180/1e3a8a/FFFFFF?text=no+image';
       img.alt = ep.title;
       img.onerror = () => { img.src = 'https://placehold.co/320x180/1e3a8a/FFFFFF?text=image+error'; };
+
       const t = document.createElement('p');
       t.textContent = ep.title;
+
       card.appendChild(img);
       card.appendChild(t);
       grid.appendChild(card);
