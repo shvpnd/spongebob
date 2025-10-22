@@ -1,0 +1,30 @@
+body {
+  display: flex;
+  justify-content: center;
+}
+.container {
+  width: 100%;
+  max-width: 1200px;
+}
+#pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 5px;
+  margin-bottom: 25px;
+}
+#episodes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 20px;
+}
+.episode-card {
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.header-gif {
+  display: block;
+  margin: auto;
+  margin-bottom: 25px;
+}
