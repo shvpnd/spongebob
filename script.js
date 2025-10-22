@@ -1,4 +1,4 @@
-const proxy = 'https://api.allorigins.win/raw?url=';
+const proxy = 'https://api.codetabs.com/v1/proxy?quest=';
 const base = 'https://www.megacartoons.net/video-serie/spongebob-squarepants/page/';
 const total = 16;
 
@@ -7,7 +7,7 @@ const grid = document.getElementById('episodes-grid');
 const loader = document.getElementById('loader');
 
 async function fetchPage(url) {
-  const full = proxy + encodeURIComponent(url);
+  const full = proxy + url;
   try {
     const res = await fetch(full);
     if (!res.ok) throw new Error(res.status);
@@ -42,12 +42,17 @@ async function loadPage(num) {
     return;
   }
 
-  const details = items.map(async el => {
+  loader.style.display = 'none';
+  let episodesFound = 0;
+
+  for (const el of items) {
     const link = el.href;
     const title = el.title.replace('Watch ', '').trim();
     const imgUrl = el.querySelector('img')?.src;
+
     const epDoc = await fetchPage(link);
-    if (!epDoc) return null;
+    
+    if (!epDoc) continue; 
 
     let video = null;
     const input = epDoc.querySelector('input[name="main_video_url"]');
@@ -61,33 +66,30 @@ async function loadPage(num) {
         if (match && match[1]) video = match[1];
       }
     }
-    if (video) return { title, thumbnail: imgUrl, download: video };
-    return null;
-  });
 
-  const eps = await Promise.all(details);
-  loader.style.display = 'none';
+    if (video) {
+      episodesFound++;
+      const ep = { title, thumbnail: imgUrl, download: video };
+      
+      const card = document.createElement('a');
+      card.className = 'episode-card';
+      card.href = ep.download;
+      const safe = ep.title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
+      card.download = `${safe}.mp4`;
+      const img = document.createElement('img');
+      img.src = ep.thumbnail || 'https://placehold.co/320x180/1e3a8a/FFFFFF?text=no+image';
+      img.alt = ep.title;
+      img.onerror = () => { img.src = 'https://placehold.co/320x180/1e3a8a/FFFFFF?text=image+error'; };
+      const t = document.createElement('p');
+      t.textContent = ep.title;
+      card.appendChild(img);
+      card.appendChild(t);
+      grid.appendChild(card);
+    }
+  }
 
-  eps.forEach(ep => {
-    if (!ep) return;
-    const card = document.createElement('a');
-    card.className = 'episode-card';
-    card.href = ep.download;
-    const safe = ep.title.replace(/[^a-zA-Z0-9 ]/g, '').replace(/\s+/g, '-');
-    card.download = `${safe}.mp4`;
-    const img = document.createElement('img');
-    img.src = ep.thumbnail || 'https://placehold.co/320x180/1e3a8a/FFFFFF?text=no+image';
-    img.alt = ep.title;
-    img.onerror = () => { img.src = 'https://placehold.co/320x180/1e3a8a/FFFFFF?text=image+error'; };
-    const t = document.createElement('p');
-    t.textContent = ep.title;
-    card.appendChild(img);
-    card.appendChild(t);
-    grid.appendChild(card);
-  });
-
-  if (grid.childElementCount === 0) {
-    grid.innerHTML = '<p>could not find valid download links for episodes on this page.</p>';
+  if (episodesFound === 0) {
+    grid.innerHTML = '<p>could not find valid download links for any episodes on this page.</p>';
   }
 }
 
